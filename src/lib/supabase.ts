@@ -1,23 +1,23 @@
 import { createClient } from '@supabase/supabase-js'
 
-interface ImportMetaEnv {
-  readonly VITE_SUPABASE_URL: string
-  readonly VITE_SUPABASE_ANON_KEY: string
+// Define the environment variables type
+declare global {
+  interface ImportMetaEnv {
+    VITE_SUPABASE_URL: string
+    VITE_SUPABASE_ANON_KEY: string
+  }
 }
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv
-}
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase environment variables. Please check your .env file and make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.'
-  )
-}
+// Fallback values for development
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://vapgczkpuokiwsngbdft.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhcGdjemtwdW9raXdzbmdiZGZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjU2MjksImV4cCI6MjA2MjA0MTYyOX0.ut8xyU02r_9kNw71ccjFNAE1fbtYf2qIrOWaTlEBnGs'
 
 console.log('Initializing Supabase client...')
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey) 
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+}) 
