@@ -16,21 +16,46 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    console.log('Initializing AuthProvider...')
+    try {
+      // Check active sessions and sets the user
+      console.log('Attempting to get session...')
+      supabase.auth.getSession().then(({ data: { session }, error: sessionError }) => {
+        if (sessionError) {
+          console.error('Session error:', sessionError)
+          setError(sessionError)
+          setLoading(false)
+          return
+        }
+        console.log('Session retrieved:', session ? 'User logged in' : 'No user')
+        setUser(session?.user ?? null)
+        setLoading(false)
+      }).catch(err => {
+        console.error('Error getting session:', err)
+        setError(err)
+        setLoading(false)
+      })
 
-    // Listen for changes on auth state (signed in, signed out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+      // Listen for changes on auth state (signed in, signed out, etc.)
+      console.log('Setting up auth state listener...')
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        console.log('Auth state changed:', _event)
+        setUser(session?.user ?? null)
+        setLoading(false)
+      })
 
-    return () => subscription.unsubscribe()
+      return () => {
+        console.log('Cleaning up auth subscription...')
+        subscription.unsubscribe()
+      }
+    } catch (err) {
+      console.error('Error initializing auth:', err)
+      setError(err instanceof Error ? err : new Error('Failed to initialize auth'))
+      setLoading(false)
+    }
   }, [])
 
   const signUp = async (email: string, password: string) => {
