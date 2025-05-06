@@ -9,8 +9,14 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
 }
 
-const supabaseUrl = 'https://vapgczkpuokiwsngbdft.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhcGdjemtwdW9raXdzbmdiZGZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjU2MjksImV4cCI6MjA2MjA0MTYyOX0.ut8xyU02r_9kNw71ccjFNAE1fbtYf2qIrOWaTlEBnGs'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase environment variables. Please check your .env file and make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.'
+  )
+}
 
 console.log('Initializing Supabase client...')
 
